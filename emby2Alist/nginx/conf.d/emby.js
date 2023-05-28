@@ -2,12 +2,17 @@
 //查看日志: "docker logs -f -n 10 emby-nginx 2>&1  | grep js:"
 async function redirect2Pan(r) {
     //根据实际情况修改下面的设置
-    const embyHost = 'http://172.17.0.1:8096'; //这里默认emby/jellyfin的地址是宿主机,要注意iptables给容器放行端口
-    const embyMountPath = '/mnt';  // rclone 的挂载目录, 例如将od, gd挂载到/mnt目录下:  /mnt/onedrive  /mnt/gd ,那么这里 就填写 /mnt
-    const alistToken = 'alsit-123456';      //alist token, 在alist后台查看
-    const alistAddr= 'http://172.17.0.1:5244'; //访问宿主机上5244端口的alist地址, 要注意iptables给容器放行端口
-    const embyApiKey = 'f839390f50a648fd92108bc11ca6730a';  //emby/jellyfin api key, 在emby/jellyfin后台设置
-    const alistPublicAddr = 'http://youralist.com:5244'; // alist公网地址, 用于需要alist server代理流量的情况, 按需填写
+    const embyIp = 'http://172.17.0.1';
+    const publicDomain = 'http://youralist.com';
+    const embyPort = 8098;
+    const embyHost = embyIp + ':' + embyPort; //这里默认emby/jellyfin的地址是宿主机,要注意iptables给容器放行端口
+    const embyMountPath = '/AList';  // rclone 的挂载目录, 例如将od, gd挂载到/mnt目录下:  /mnt/onedrive  /mnt/gd ,那么这里 就填写 /mnt
+    const alistToken = 'alist-2528f39b';      //alist token, 在alist后台查看
+    const alistIp = 'http://172.17.0.1';
+    const alistPort = 5244;
+    const alistAddr= alistIp + ':' + alistPort; //访问宿主机上5244端口的alist地址, 要注意iptables给容器放行端口
+    const embyApiKey = 'ed8cb97fe03f4d09b5b3f33ed';  //emby/jellyfin api key, 在emby/jellyfin后台设置
+    const alistPublicAddr = publicDomain + ':' + alistPort; // alist公网地址, 用于需要alist server代理流量的情况, 按需填写
 
     //fetch mount emby/jellyfin file path
     const regex = /[A-Za-z0-9]+/g;
@@ -37,8 +42,17 @@ async function redirect2Pan(r) {
     const alistFsGetApiPath = `${alistAddr}/api/fs/get`;
     let alistRes = await fetchAlistPathApi(alistFsGetApiPath, alistFilePath, alistToken);
     if (!alistRes.startsWith('error')) {
-        alistRes =  alistRes.includes('http://172.17.0.1') ? alistRes.replace('http://172.17.0.1',alistPublicAddr) : alistRes;
-        r.warn(`redirect to: ${alistRes}`);
+        // alistRes =  alistRes.includes('http://172.17.0.1') ? alistRes.replace('http://172.17.0.1',alistPublicAddr) : alistRes;
+        // 修复AList本地代理地址无端口返回bug
+        // alistRes =  alistRes.includes(alistIp) && !alistRes.includes(alistPort) ? alistRes.replace(alistIp, alistPublicAddr) : alistRes;
+        // r.warn(`redirect to: ${alistRes}`);
+        // 播放本地视频时，不使用alist直链
+        if (alistRes.startsWith(alistIp) || alistRes.startsWith(publicDomain)) {
+            alistRes = `${publicDomain}:${embyPort}${r.uri}?DeviceId=${r.args.DeviceId}&MediaSourceId=${mediaSourceId}&Static=${r.args.Static}&PlaySessionId=${r.args.PlaySessionId}&api_key=${api_key}`;
+            r.warn(`direct to: ${alistRes}`);
+            r.return(302, alistRes);
+            return;
+        }
         r.return(302, alistRes);
         return;
     }
@@ -77,6 +91,8 @@ async function redirect2Pan(r) {
 }
 
 async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
+	ngx.log(ngx.WARN, `alistApiPath: ${alistApiPath}`);
+	ngx.log(ngx.WARN, `alistFilePath: ${alistFilePath}`);
     const alistRequestBody = {
         "path": alistFilePath,
         "password": ''
@@ -97,7 +113,8 @@ async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
                 return `error: alist_path_api response is null`;
             }
             if (result.message == 'success') {
-                if (result.data.raw_url) {
+            	if (result.data.raw_url) {
+                	ngx.log(ngx.WARN, `alist api result.data.raw_url: ${JSON.stringify(result.data.raw_url)}`);
                     return result.data.raw_url;
                 }
                 return result.data.content.map(item => item.name).join(',');
