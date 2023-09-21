@@ -35,18 +35,17 @@ function getItemInfo(r) {
     : r.args.api_key;
   api_key = api_key ? api_key : embyApiKey;
   // 判断是否app下载
-	let embyRes = '';
-	let itemInfoUri = '';
+  let embyRes = '';
+  let itemInfoUri = '';
   if (r.uri.includes('JobItems')) {
 		itemInfoUri = `${embyHost}/Sync/JobItems?api_key=${api_key}`;
-		embyRes = await fetchEmbyJobItemFilePath(itemInfoUri, itemId);
-	} else {
-	    if (mediaSourceId) {
-	        itemInfoUri = `${embyHost}/Items/${itemId}/PlaybackInfo?MediaSourceId=${mediaSourceId}&api_key=${api_key}`;
-	    } else {
-	        itemInfoUri = `${embyHost}/Items/${itemId}/PlaybackInfo?api_key=${api_key}`;
-	    }
-	}
+  } else {
+    if (mediaSourceId) {
+			itemInfoUri = `${embyHost}/Items/${itemId}/PlaybackInfo?MediaSourceId=${mediaSourceId}&api_key=${api_key}`;
+    } else {
+			itemInfoUri = `${embyHost}/Items/${itemId}/PlaybackInfo?api_key=${api_key}`;
+    }
+  }
   return { itemId, mediaSourceId, Etag, api_key, itemInfoUri };
 }
 
