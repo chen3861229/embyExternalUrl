@@ -8,6 +8,9 @@ async function redirect2Pan(r) {
   const alistToken = config.alistToken;
   const alistAddr = config.alistAddr;
   const alistPublicAddr = config.alistPublicAddr;
+  const alistIp = config.alistIp;
+  const publicDomain = config.publicDomain;
+  const embyPort = config.embyPort;
   //fetch mount emby/jellyfin file path
   const itemInfo = util.getItemInfo(r);
   r.warn(`itemInfoUri: ${itemInfo.itemInfoUri}`);
@@ -28,10 +31,21 @@ async function redirect2Pan(r) {
     alistToken
   );
   if (!alistRes.startsWith("error")) {
-    alistRes = alistRes.includes("http://172.17.0.1")
-      ? alistRes.replace("http://172.17.0.1", alistPublicAddr)
-      : alistRes;
-    r.warn(`redirect to: ${alistRes}`);
+    // alistRes =  alistRes.includes('http://172.17.0.1')
+    //   ? alistRes.replace('http://172.17.0.1', alistPublicAddr)
+    //   : alistRes;
+    // 修复AList本地代理地址无端口返回bug
+    // alistRes =  alistRes.includes(alistIp)
+    //   && !alistRes.includes(alistPort)
+    //   ? alistRes.replace(alistIp, alistPublicAddr)
+    //   : alistRes;
+    // r.warn(`redirect to: ${alistRes}`);
+    // 播放本地视频时,不使用alist直链
+    if (alistRes.startsWith(alistIp) || alistRes.startsWith(publicDomain)) {
+        alistRes = `${publicDomain}:${embyPort}${r.uri}?DeviceId=${r.args.DeviceId}&MediaSourceId=${mediaSourceId}&Static=${r.args.Static}&PlaySessionId=${r.args.PlaySessionId}&api_key=${api_key}`;
+        r.warn(`direct to: ${alistRes}`);
+        return;
+    }
     r.return(302, alistRes);
     return;
   }
@@ -99,6 +113,8 @@ async function transferPlaybackInfo(r) {
 }
 
 async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
+  ngx.log(ngx.WARN, `alistApiPath: ${alistApiPath}`);
+	ngx.log(ngx.WARN, `alistFilePath: ${alistFilePath}`);
   const alistRequestBody = {
     path: alistFilePath,
     password: "",
@@ -120,6 +136,7 @@ async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
       }
       if (result.message == "success") {
         if (result.data.raw_url) {
+          ngx.log(ngx.WARN, `alist api result.data.raw_url: ${JSON.stringify(result.data.raw_url)}`);
           return result.data.raw_url;
         }
         return result.data.content.map((item) => item.name).join(",");
