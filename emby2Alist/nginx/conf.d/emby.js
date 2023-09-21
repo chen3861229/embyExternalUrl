@@ -40,11 +40,10 @@ async function redirect2Pan(r) {
     //   ? alistRes.replace(alistIp, alistPublicAddr)
     //   : alistRes;
     // r.warn(`redirect to: ${alistRes}`);
-    // 播放本地视频时,不使用alist直链
+    // 播放AList挂载的NAS本地视频时,存在卡顿与花屏,替换alist直链回到原始emby服务
     if (alistRes.startsWith(alistIp) || alistRes.startsWith(publicDomain)) {
-        alistRes = `${publicDomain}:${embyPort}${r.uri}?DeviceId=${r.args.DeviceId}&MediaSourceId=${mediaSourceId}&Static=${r.args.Static}&PlaySessionId=${r.args.PlaySessionId}&api_key=${api_key}`;
-        r.warn(`direct to: ${alistRes}`);
-        return;
+        alistRes = `${publicDomain}:${embyPort}${r.uri}?DeviceId=${r.args.DeviceId}&MediaSourceId=${itemInfo.mediaSourceId}&Static=${r.args.Static}&PlaySessionId=${r.args.PlaySessionId}&api_key=${itemInfo.api_key}`;
+        r.warn(`alist direct link change to: ${alistRes}`);
     }
     r.return(302, alistRes);
     return;

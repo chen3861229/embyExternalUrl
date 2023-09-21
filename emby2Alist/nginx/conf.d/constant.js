@@ -27,8 +27,8 @@ export default {
   embyHost,
   embyMountPath,
   alistToken,
-  // alistIp,
-  // alistPort,
+  alistIp,
+  alistPort,
   alistAddr,
   embyApiKey,
   alistPublicAddr
