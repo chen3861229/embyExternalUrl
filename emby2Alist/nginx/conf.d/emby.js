@@ -13,8 +13,8 @@ async function redirect2Pan(r) {
   const embyPort = config.embyPort;
   //fetch mount emby/jellyfin file path
   const itemInfo = util.getItemInfo(r);
-  r.warn(`itemInfoUri: ${itemInfo.itemInfoUri}`);
-  const embyRes = await fetchEmbyFilePath(itemInfo.itemInfoUri, itemInfo.Etag);
+  r.warn(`itemInfo: ${JSON.stringify(itemInfo)}`);
+  const embyRes = await fetchEmbyFilePath(itemInfo.itemInfoUri, itemInfo.Etag, itemInfo.itemId);
   if (embyRes.startsWith("error")) {
     r.error(embyRes);
     r.return(500, embyRes);
@@ -114,7 +114,7 @@ async function transferPlaybackInfo(r) {
 
 async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
   ngx.log(ngx.WARN, `alistApiPath: ${alistApiPath}`);
-	ngx.log(ngx.WARN, `alistFilePath: ${alistFilePath}`);
+  ngx.log(ngx.WARN, `alistFilePath: ${alistFilePath}`);
   const alistRequestBody = {
     path: alistFilePath,
     password: "",
@@ -153,10 +153,17 @@ async function fetchAlistPathApi(alistApiPath, alistFilePath, alistToken) {
   }
 }
 
-async function fetchEmbyFilePath(itemInfoUri, Etag) {
+async function fetchEmbyFilePath(itemInfoUri, Etag, itemId) {
   try {
+    let method = "POST";
+    // 1: 原始, 2: JobItems返回值
+    let resultType = 1;
+    if (itemInfoUri.includes("JobItems")) {
+      method = "GET";
+      resultType = 2;
+    }
     const res = await ngx.fetch(itemInfoUri, {
-      method: "POST",
+      method: method,
       headers: {
         "Content-Type": "application/json;charset=utf-8",
         "Content-Length": 0,
@@ -168,13 +175,21 @@ async function fetchEmbyFilePath(itemInfoUri, Etag) {
       if (result === null || result === undefined) {
         return `error: emby_api itemInfoUri response is null`;
       }
-      if (Etag) {
-        const mediaSource = result.MediaSources.find((m) => m.ETag == Etag);
-        if (mediaSource && mediaSource.Path) {
-          return mediaSource.Path;
+      if (resultType == 2) {
+        ngx.log(ngx.WARN, `emby /Sync/JobItems api result: ${JSON.stringify(result.Items)}`);
+        const jobItem = result.Items.find(o => o.Id == itemId);
+        if (jobItem) {
+	  return jobItem.MediaSource.Path;
         }
+      } else {
+        if (Etag) {
+	  const mediaSource = result.MediaSources.find((m) => m.ETag == Etag);
+	  if (mediaSource && mediaSource.Path) {
+	    return mediaSource.Path;
+	  }
+        }
+        return result.MediaSources[0].Path; 
       }
-      return result.MediaSources[0].Path;
     } else {
       return `error: emby_api ${res.status} ${res.statusText}`;
     }
