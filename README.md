@@ -71,14 +71,15 @@ docker logs -f nginx-embyUrl 2>&1 | grep error
 Alipay: <img src="./donate/Alipay.jpg" width="150px">
 Wechat: <img src="./donate/Wechat.jpg" width="170px">
 
+BTC(SegWit): <img src="./donate/BTC(SegWit).jpg" width="150px">
+USDT-Tron (TRC20): <img src="./donate/USDT-Tron (TRC20).jpg" width="150px">
+
 Binance ID/币安 ID: 1041685683
 
 BTC
 1. Network: BTC(SegWit)
 2. Deposit Address: bc1qvr80l9juwkg94mpe55wafpwwnqtzjfs9tje8zn
-<img src="./donate/BTC(SegWit).jpg" width="150px">
 
 USDT
 1. Network: Tron (TRC20)
 2. Deposit Address: TSsmBGRhtN2AZHSG7WtvYN2UZ3dLdtMpUN
-<img src="./donate/USDT-Tron (TRC20).jpg" width="150px">
