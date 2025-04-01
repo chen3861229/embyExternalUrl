@@ -23,7 +23,7 @@ const redirectConfig = {
 const routeCacheConfig = {
   // 总开关,是否开启路由缓存,此为一级缓存,添加阶段为 redirect 和 proxy 之前
   // 短时间内同客户端访问相同资源不会再做判断和请求 alist,有限的防抖措施,出现问题可以关闭此选项
-  enable: true,
+  enable: false,
   // 二级缓存开关,仅针对直链,添加阶段为进入单集详情页,clientSelfAlistRule 中的和首页直接播放的不生效
   // 非 web 端且限 UA 的不建议使用,效率太低,因部分客户端详情页 UA 和播放器 UA 存在不同的情况
   enableL2: false,
