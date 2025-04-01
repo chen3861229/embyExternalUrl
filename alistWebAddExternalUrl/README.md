@@ -50,6 +50,9 @@ greasyfork 地址: https://greasyfork.org/en/scripts/459297-embylaunchpotplayer
 
 ### CHANGELOG
 
+#### 1.1.4
+1. fix(alistWebLaunchExternalPlayer): 兼容新的 vlc-protocol,mpvplay-protocol 播放链接
+
 #### 1.1.3
 1. fix(alistWebLaunchExternalPlayer): 提供内部变量移除最后几个冗余的自定义开关
 
