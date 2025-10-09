@@ -4,7 +4,7 @@
 // @name:zh      embyLaunchPotplayer
 // @name:zh-CN   embyLaunchPotplayer
 // @namespace    http://tampermonkey.net/
-// @version      1.1.21
+// @version      1.2.1
 // @description  emby/jellfin launch extetnal player
 // @description:zh-cn emby/jellfin 调用外部播放器
 // @description:en  emby/jellfin to external player
@@ -488,14 +488,14 @@
         //桌面端需要额外设置,使用这个项目: https://github.com/akiirui/mpv-handler
         let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
             .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-        let MPVUrl = `mpv://play/${streamUrl64}`;
+        let MPVUrl = `mpv-handler://play/${streamUrl64}`;
         if (mediaInfo.subUrl.length > 0) {
             let subUrl64 = btoa(mediaInfo.subUrl).replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-            MPVUrl = `mpv://play/${streamUrl64}/?subfile=${subUrl64}`;
+            MPVUrl = `mpv-handler://play/${streamUrl64}/?subfile=${subUrl64}`;
         }
 
         if (OS.isIOS() || OS.isAndroid()) {
-            MPVUrl = `mpv://${encodeURI(mediaInfo.streamUrl)}`;
+            MPVUrl = `mpv-handler://${encodeURI(mediaInfo.streamUrl)}`;
         }
 
         console.log(MPVUrl);
