@@ -9,14 +9,18 @@ import urlUtil from "../common/url-util.js";
 /**
  * fetchLastLink, actually this just once request,currently sufficient
  * @param {String} oriLink eg: "https://alist/d/file.xxx" or "http(s)://xxx"
- * @param {String} authType eg: "sign"
- * @param {String} authInfo eg: "sign:token:expireTime"
+ * @param {String} authType eg: "sign", "basic"
+ * @param {String} authInfo eg: "token:expireTime", "username:password"
  * @param {String} ua 
  * @returns redirect after link
  */
 async function fetchLastLink(oriLink, authType, authInfo, ua) {
+  let authHeaderStr = "";
+   const reqHeaders = {
+    "User-Agent": ua,
+  };
   // this is for multiple instances alist add sign
-  if (authType && authType === "sign" && authInfo) {
+  if (authType && authType === util.AUTH_TYPE_ENUM.sign && authInfo) {
     const arr = authInfo.split(":");
     oriLink = util.addAlistSign(oriLink, arr[0], parseInt(arr[1]));
   }
@@ -24,18 +28,20 @@ async function fetchLastLink(oriLink, authType, authInfo, ua) {
   if (config.alistSignEnable) {
     oriLink = util.addAlistSign(oriLink, config.alistToken, config.alistSignExpireTime);
   }
+  if (authType && authType === util.AUTH_TYPE_ENUM.basic && authInfo) {
+    authHeaderStr = `Basic ${btoa(authInfo)}`;
+    reqHeaders["Authorization"] = authHeaderStr;
+  }
   const url = encodeURI(oriLink);
   const urlParts = urlUtil.parseUrl(url);
   const hostValue = `${urlParts.host}:${urlParts.port}`;
-  ngx.log(ngx.WARN, `fetchLastLink add Host: ${hostValue}`);
+  reqHeaders["Host"] = hostValue;
+  ngx.log(ngx.WARN, `fetchLastLink reqHeaders: ${JSON.stringify(reqHeaders)}`);
   try {
     // fetch Api ignore nginx locations,ngx.ferch,redirects are not handled
     const response = await ngx.fetch(url, {
       method: "HEAD",
-      headers: {
-        "User-Agent": ua,
-        Host: hostValue,
-      },
+      headers: reqHeaders,
       max_response_body_size: 1024
     });
     const contentType = response.headers["Content-Type"];
