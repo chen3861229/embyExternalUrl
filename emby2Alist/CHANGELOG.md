@@ -1,6 +1,9 @@
 
 ### 文章更新记录
 
+#### 2025-10-15
+1.feat(emby2Alist&plex2Alist): 针对远程链接添加 Basic 认证方式支持
+
 #### 2025-04-02
 1.fix(emby2Alist&plex2Alist): 关闭默认的路由缓存配置
 

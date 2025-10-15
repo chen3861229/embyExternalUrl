@@ -22,9 +22,10 @@ const redirectStrmLastLinkRule = [
   [0, strHead.lanIp.map(s => "http://" + s)],
   // [0, alistAddr],
   // [0, "http:"],
-  // 参数5: 请求验证类型,当前 alistAddr 不需要此参数
-  // 参数6: 当前 alistAddr 不需要此参数,alistSignExpireTime
+  // 参数?.5: 请求验证类型,"sign": alist sign 验证, "basic": Basic Auth 账号密码,当前 alistAddr 不需要此参数
+  // 参数?.6: 请求验证信息,":" 分隔,当前 alistAddr 不需要此参数,alistSignExpireTime
   // [3, "http://otheralist1.com", "sign", `${alistToken}:${alistSignExpireTime}`],
+  // [2, "http://other-WebDAV.com", "basic", `${username}:${password}`],
   // useGroup01 同时满足才命中
   // ["useGroup01", "filePath", "startsWith", strHead.lanIp.map(s => "http://" + s)], // 目标地址
   // ["useGroup01", "r.args.X-Emby-Client", "startsWith:not", strHead.xEmbyClients.seekBug], // 链接入参,客户端类型
