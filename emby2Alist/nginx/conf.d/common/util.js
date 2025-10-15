@@ -49,6 +49,11 @@ const MATCHER_ENUM = {
   not: { id: "not", fn: (flag) => !flag }, // special
 };
 
+const AUTH_TYPE_ENUM = {
+  sign: "sign",
+  basic: "basic",
+};
+
 /**
  * doUrlMapping
  * @param {Object} r nginx objects, HTTP Request
@@ -149,7 +154,9 @@ function getRouteMode(r, filePath, isAlistRes, notLocal) {
   if (!isAlistRes) {
     const mountPath = config.mediaMountPath;
     // exact, local file not mediaMountPath first
-    if (!notLocal && mountPath && mountPath.every(path => path && !filePath.startsWith(path))) {
+    if (!notLocal && Array.isArray(mountPath) && mountPath.length > 0
+      && mountPath.every(path => path && !filePath.startsWith(path)))
+    {
       ngx.log(ngx.WARN, `hit proxy, localFile not mountPath first: ${JSON.stringify(mountPath)}`);
       return ROUTE_ENUM.proxy;
     }
@@ -750,6 +757,7 @@ export default {
   ROUTE_ENUM,
   CHCHE_LEVEL_ENUM,
   SOURCE_STR_ENUM,
+  AUTH_TYPE_ENUM,
   doUrlMapping,
   copyHeaders,
   getRouteMode,
