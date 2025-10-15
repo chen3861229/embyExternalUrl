@@ -71,6 +71,9 @@ Emby Web, iconOnly: true
 
 ### CHANGELOG
 
+#### 1.2.1
+1. fix(embyLaunchPotplayer): 兼容上游 https://github.com/akiirui/mpv-handler 协议名称的修改
+
 #### 1.1.22
 1. fix(embyLaunchPotplayer): 兼容新的 vlc-protocol,mpvplay-protocol 播放链接
 
