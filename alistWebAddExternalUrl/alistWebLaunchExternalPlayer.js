@@ -4,7 +4,7 @@
 // @name:zh      alistWebLaunchExternalPlayer
 // @name:zh-CN   alistWebLaunchExternalPlayer
 // @namespace    http://tampermonkey.net/
-// @version      1.1.3
+// @version      1.1.4
 // @description  alist Web Launc hExternal Player
 // @description:zh-cn alistWeb 调用外部播放器, 注意自行更改 UI 中的包括/排除,或下面的 @match
 // @description:en  alist Web Launch External Player
@@ -320,8 +320,10 @@
     function getVlcUrl(mediaInfo) {
         // android subtitles:  https://code.videolan.org/videolan/vlc-android/-/issues/1903
         let vlcUrl = `intent:${encodeURI(mediaInfo.streamUrl)}#Intent;package=org.videolan.vlc;type=video/*;S.subtitles_location=${encodeURI(mediaInfo.subUrl)};S.title=${encodeURI(mediaInfo.title)};i.position=${mediaInfo.position};end`;
-        if (OS.isWindows()) {
-            // 桌面端需要额外设置,参考这个项目: https://github.com/stefansundin/vlc-protocol 
+        if (OS.isWindows() || OS.isMacOS()) {
+            // 桌面端需要额外设置,参考这个项目:
+            // new: https://github.com/northsea4/vlc-protocol
+            // old: https://github.com/stefansundin/vlc-protocol
             vlcUrl = `vlc://${encodeURI(mediaInfo.streamUrl)}`;
         }
         if (OS.isIOS()) {
@@ -330,6 +332,28 @@
             vlcUrl = `vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(mediaInfo.streamUrl)}&sub=${encodeURIComponent(mediaInfo.subUrl)}`;
         }
         return vlcUrl;
+    }
+
+    // MPV
+    function getMPVUrl(mediaInfo) {
+        // 桌面端需要额外设置,参考这个项目:
+        // new: https://github.com/northsea4/mpvplay-protocol
+        // old: https://github.com/akiirui/mpv-handler
+        let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
+            .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
+        let MPVUrl = `mpv://play/${streamUrl64}`;
+        if (mediaInfo.subUrl.length > 0) {
+            let subUrl64 = btoa(mediaInfo.subUrl).replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
+            MPVUrl = `mpv://play/${streamUrl64}/?subfile=${subUrl64}`;
+        }
+
+        if (OS.isIOS() || OS.isAndroid()) {
+            MPVUrl = `mpv://${encodeURI(mediaInfo.streamUrl)}`;
+        }
+        if (OS.isMacOS()) {
+            MPVUrl = `mpvplay://${encodeURI(mediaInfo.streamUrl)}`;
+        }
+        return MPVUrl;
     }
 
     // https://sites.google.com/site/mxvpen/api
@@ -363,23 +387,6 @@
     // StellarPlayer
     function getStellarPlayerUrl (mediaInfo) {
         return `stellar://play/${encodeURI(mediaInfo.streamUrl)}`;
-    }
-
-    // MPV
-    function getMPVUrl(mediaInfo) {
-        //桌面端需要额外设置,使用这个项目: https://github.com/akiirui/mpv-handler
-        let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
-            .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-        let MPVUrl = `mpv://play/${streamUrl64}`;
-        if (mediaInfo.subUrl.length > 0) {
-            let subUrl64 = btoa(mediaInfo.subUrl).replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-            MPVUrl = `mpv://play/${streamUrl64}/?subfile=${subUrl64}`;
-        }
-
-        if (OS.isIOS() || OS.isAndroid()) {
-            MPVUrl = `mpv://${encodeURI(mediaInfo.streamUrl)}`;
-        }
-        return MPVUrl;
     }
 
     // see https://greasyfork.org/zh-CN/scripts/443916
