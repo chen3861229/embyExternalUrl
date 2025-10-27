@@ -1,4 +1,4 @@
-
+[English](README.md) | [简体中文](README.zh-Hans.md)
 
 ---
 
@@ -79,7 +79,3 @@ docker logs -f nginx-embyUrl 2>&1 | grep error
 ### Emby External Player User Script (Web Only)
 
 Available here: [GreasyFork Script](https://greasyfork.org/zh-CN/scripts/514529)
-
----
-
-Would you like me to also **restructure this into a polished `README.md` file** (with English headings, code blocks, and deployment steps) so you can drop it directly into your GitHub repo?
