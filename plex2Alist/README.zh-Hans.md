@@ -1,7 +1,4 @@
-[English][readme-en] | [简体中文][readme-zh-hans]
-
-[readme-en](./README.md)
-[readme-zh-hans](./README.zh-Hans.md)
+[English](README.md) | [简体中文](README.zh-Hans.md)
 
 ---
 title: plex 重定向到 alist 直链
