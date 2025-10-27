@@ -1,3 +1,7 @@
+[English][readme-en] | [简体中文][readme-zh-hans]
+
+[readme-en](./README.md)
+[readme-zh-hans](./README.zh-Hans.md)
 
 ---
 

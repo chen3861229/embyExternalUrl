@@ -429,9 +429,7 @@
     // MPV
     async function embyMPV() {
         let mediaInfo = await getEmbyMediaInfo();
-        // Desktop requires additional setup, refer to this project:
-        // new: https://github.com/northsea4/mpvplay-protocol
-        // old: https://github.com/akiirui/mpv-handler
+        // Desktop requires additional setup, refer to this project: https://github.com/akiirui/mpv-handler
         let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
             .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
         let MPVUrl = `mpv://play/${streamUrl64}`;
