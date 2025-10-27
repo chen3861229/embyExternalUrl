@@ -5,8 +5,8 @@
 // @name:zh-CN   embyLaunchPotplayer
 // @namespace    http://tampermonkey.net/
 // @version      1.2.1
-// @description  emby/jellfin launch extetnal player
-// @description:zh-cn emby/jellfin 调用外部播放器
+// @description  emby/jellfin launch external player
+// @description:zh-cn emby/jellfin call external player
 // @description:en  emby/jellfin to external player
 // @license      MIT
 // @author       @bpking
@@ -18,21 +18,21 @@
 (function () {
     'use strict';
     const iconConfig = {
-        // 图标来源,以下三选一,注释为只留一个,3 的优先级最高
+        // Icon source, choose one of the following three, comment to leave only one, 3 has the highest priority
         // 1.add icons from jsdelivr, network
         baseUrl: "https://emby-external-url.7o7o.cc/embyWebAddExternalUrl/icons",
         // baseUrl: "https://fastly.jsdelivr.net/gh/bpking1/embyExternalUrl@main/embyWebAddExternalUrl/icons",
         // 2.server local icons, same as /emby-server/system/dashboard-ui/icons
         // baseUrl: "icons",
         // 3.add icons from Base64, script inner, this script size 22.5KB to 74KB,
-        // 自行复制 ./iconsExt.js 内容到此脚本的 getIconsExt 中
-        // 移除最后几个冗余的自定义开关
+        // Copy the content of ./iconsExt.js to getIconsExt in this script
+        // Remove the last few redundant custom switches
         removeCustomBtns: false,
     };
-    // 启用后将修改直接串流链接为真实文件名,方便第三方播放器友好显示和匹配,
-    // 默认不启用,强依赖 nginx-emby2Alist location two rewrite,如发现原始链接播放失败,请关闭此选项
+    // When enabled, modify direct streaming links to real file names for third-party player friendly display and matching,
+    // Default disabled, strongly depends on nginx-emby2Alist location two rewrite, if original link playback fails, please disable this option
     const useRealFileName = false;
-    // 以下为内部使用变量,请勿更改
+    // The following are internal use variables, please do not change
     let isEmby = "";
     const mark = "embyLaunchPotplayer";
     const playBtnsWrapperId = "ExternalPlayersBtns";
@@ -67,10 +67,10 @@
             , onClick: embyMXPro, osCheck: [OS.isAndroid], },
         { id: "embyInfuse", title: "Infuse", iconId: "icon-infuse"
             , onClick: embyInfuse, osCheck: [OS.isApple], },
-        { id: "embyStellarPlayer", title: "恒星播放器", iconId: "icon-StellarPlayer"
+        { id: "embyStellarPlayer", title: "Stellar Player", iconId: "icon-StellarPlayer"
             , onClick: embyStellarPlayer, osCheck: [OS.isWindows, OS.isMacOS, OS.isAndroid], },
         { id: "embyMPV", title: "MPV", iconId: "icon-MPV", onClick: embyMPV, },
-        { id: "embyDDPlay", title: "弹弹Play", iconId: "icon-DDPlay"
+        { id: "embyDDPlay", title: "DanDan Play", iconId: "icon-DDPlay"
             , onClick: embyDDPlay, osCheck: [OS.isWindows, OS.isAndroid], },
         { id: "embyFileball", title: "Fileball", iconId: "icon-Fileball"
             , onClick: embyFileball, osCheck: [OS.isApple], },
@@ -80,15 +80,15 @@
             , onClick: embyFigPlayer, osCheck: [OS.isMacOS], },
         { id: "embySenPlayer", title: "SenPlayer", iconId: "icon-SenPlayer"
             , onClick: embySenPlayer, osCheck: [OS.isIOS], },
-        { id: "embyCopyUrl", title: "复制串流地址", iconId: "icon-Copy", onClick: embyCopyUrl, },
+        { id: "embyCopyUrl", title: "Copy Stream URL", iconId: "icon-Copy", onClick: embyCopyUrl, },
     ];
     // Jellyfin Icons: https://marella.github.io/material-icons/demo
     // Emby Icons: https://fonts.google.com/icons
     const customBtns = [
-        { id: "hideByOS", title: "异构播放器", iconName: "more", onClick: hideByOSHandler, },
-        { id: "iconOnly", title: "显示模式", iconName: "open_in_full", onClick: iconOnlyHandler, },
-        { id: "notCurrentPot", title: "多开Potplayer", iconName: "window", onClick: notCurrentPotHandler, },
-        { id: "strmDirect", title: "STRM直通", desc: "AList注意关sign,否则不要开启此选项,任然由服务端处理sign"
+        { id: "hideByOS", title: "Heterogeneous Players", iconName: "more", onClick: hideByOSHandler, },
+        { id: "iconOnly", title: "Display Mode", iconName: "open_in_full", onClick: iconOnlyHandler, },
+        { id: "notCurrentPot", title: "Multi-instance Potplayer", iconName: "window", onClick: notCurrentPotHandler, },
+        { id: "strmDirect", title: "STRM Direct", desc: "AList note: turn off sign, otherwise do not enable this option, still processed by server side sign"
             , iconName: "link", onClick: strmDirectHandler,
         },
     ];
@@ -97,19 +97,19 @@
     }
     const fileNameReg = /.*[\\/]|(\?.*)?$/g;
     const selectors = {
-        // 详情页评分,上映日期信息栏
+        // Detail page rating, release date information bar
         embyMediaInfoDiv: "div[is='emby-scroller']:not(.hide) .mediaInfo:not(.hide)",
         jellfinMediaInfoDiv: ".itemMiscInfo-primary:not(.hide)",
-        // 电视直播详情页创建录制按钮
+        // Live TV detail page create recording button
         embyBtnManualRecording: "div[is='emby-scroller']:not(.hide) .btnManualRecording:not(.hide)",
-        // 电视直播详情页停止录制按钮
+        // Live TV detail page stop recording button
         jellfinBtnCancelTimer: ".btnCancelTimer:not(.hide)",
-        // 详情页播放收藏那排按钮
+        // Detail page play/favorite button row
         embyMainDetailButtons: "div[is='emby-scroller']:not(.hide) .mainDetailButtons",
         jellfinMainDetailButtons: "div.itemDetailPage:not(.hide) div.detailPagePrimaryContainer",
-        // 详情页字幕选择下拉框
+        // Detail page subtitle selection dropdown
         selectSubtitles: "div[is='emby-scroller']:not(.hide) select.selectSubtitles",
-        // 详情页多版本选择下拉框
+        // Detail page multi-version selection dropdown
         selectSource: "div[is='emby-scroller']:not(.hide) select.selectSource:not([disabled])",
     };
 
@@ -213,7 +213,7 @@
         }
     }
 
-    // copy from ./iconsExt,如果更改了以下内容,请同步更改 ./iconsExt.js
+    // copy from ./iconsExt, if you change the following content, please sync modify ./iconsExt.js
     function getIconsExt() {
         // base64 data total size 72.5 KB from embyWebAddExternalUrl/icons/min, sync modify
         const iconsExt = [];
@@ -234,7 +234,7 @@
         let userId = ApiClient._serverInfo.UserId;
         let itemId = /\?id=([A-Za-z0-9]+)/.exec(window.location.hash)[1];
         let response = await ApiClient.getItem(userId, itemId);
-        // 继续播放当前剧集的下一集
+        // Continue playing next episode of current series
         if (response.Type == "Series") {
             let seriesNextUpItems = await ApiClient.getNextUpEpisodes({ SeriesId: itemId, UserId: userId });
             if (seriesNextUpItems.Items.length > 0) {
@@ -242,18 +242,18 @@
                 return await ApiClient.getItem(userId, seriesNextUpItems.Items[0].Id);
             }
         }
-        // 播放当前季season的第一集
+        // Play first episode of current season
         if (response.Type == "Season") {
             let seasonItems = await ApiClient.getItems(userId, { parentId: itemId });
             console.log("seasonItemId: " + seasonItems.Items[0].Id);
             return await ApiClient.getItem(userId, seasonItems.Items[0].Id);
         }
-        // 播放当前集或电影
+        // Play current episode or movie
         if (response.MediaSources?.length > 0) {
             console.log("itemId:  " + itemId);
             return response;
         }
-        // 默认播放第一个,集/播放列表第一个媒体
+        // Default play first, episode/playlist first media
         let firstItems = await ApiClient.getItems(userId, { parentId: itemId, Recursive: true, IsFolder: false, Limit: 1 });
         console.log("firstItemId: " + firstItems.Items[0].Id);
         return await ApiClient.getItem(userId, firstItems.Items[0].Id);
@@ -277,7 +277,7 @@
     function getSubPath(mediaSource) {
         let selectSubtitles = document.querySelector(selectors.selectSubtitles);
         let subTitlePath = '';
-        //返回选中的外挂字幕
+        // Return selected external subtitles
         if (selectSubtitles && selectSubtitles.value > 0) {
             let SubIndex = mediaSource.MediaStreams.findIndex(m => m.Index == selectSubtitles.value && m.IsExternal);
             if (SubIndex > -1) {
@@ -286,13 +286,13 @@
             }
         }
         else {
-            //默认尝试返回第一个外挂中文字幕
+            // Default try to return first external Chinese subtitle
             let chiSubIndex = mediaSource.MediaStreams.findIndex(m => m.Language == "chi" && m.IsExternal);
             if (chiSubIndex > -1) {
                 let subtitleCodec = mediaSource.MediaStreams[chiSubIndex].Codec;
                 subTitlePath = `/${mediaSource.Id}/Subtitles/${chiSubIndex}/Stream.${subtitleCodec}`;
             } else {
-                //尝试返回第一个外挂字幕
+                // Try to return first external subtitle
                 let externalSubIndex = mediaSource.MediaStreams.findIndex(m => m.IsExternal);
                 if (externalSubIndex > -1) {
                     let subtitleCodec = mediaSource.MediaStreams[externalSubIndex].Codec;
@@ -349,12 +349,12 @@
     }
 
     async function getIntent(mediaSource, position) {
-        // 直播节目查询items接口没有path
+        // Live TV program query items interface has no path
         let title = mediaSource.IsInfiniteStream
             ? mediaSource.Name
             : decodeURIComponent(mediaSource.Path.replace(fileNameReg, ""));
         let externalSubs = mediaSource.MediaStreams.filter(m => m.IsExternal == true);
-        let subs = ''; // 要求是android.net.uri[] ?
+        let subs = ''; // Requires android.net.uri[] ?
         let subs_name = '';
         let subs_filename = '';
         let subs_enable = '';
@@ -390,8 +390,8 @@
         const notCurrentPotArg = localStorage.getItem(lsKeys.notCurrentPot) === "1" ? "" : "/current";
         let potUrl = `potplayer://${encodeURI(mediaInfo.streamUrl)} /sub=${encodeURI(mediaInfo.subUrl)} ${notCurrentPotArg} /seek=${getSeek(intent.position)} /title="${intent.title}"`;
         await writeClipboard(potUrl);
-        console.log("成功写入剪切板真实深度链接: ", potUrl);
-        // 测试出无空格也行,potplayer 对于 DeepLink 会自动转换为命令行参数,全量参数: PotPlayer 关于 => 命令行选项
+        console.log("Successfully wrote real deep link to clipboard: ", potUrl);
+        // Test shows no spaces also work, potplayer will automatically convert DeepLink to command line arguments, full parameters: PotPlayer About => Command Line Options
         potUrl = `potplayer://${notCurrentPotArg}/clipboard`;
         window.open(potUrl, "_self");
     }
@@ -412,7 +412,7 @@
         // android subtitles:  https://code.videolan.org/videolan/vlc-android/-/issues/1903
         let vlcUrl = `intent:${encodeURI(mediaInfo.streamUrl)}#Intent;package=org.videolan.vlc;type=video/*;S.subtitles_location=${encodeURI(mediaInfo.subUrl)};S.title=${encodeURI(intent.title)};i.position=${intent.position};end`;
         if (OS.isWindows() || OS.isMacOS()) {
-            // 桌面端需要额外设置,参考这个项目:
+            // Desktop requires additional setup, refer to this project:
             // new: https://github.com/northsea4/vlc-protocol
             // old: https://github.com/stefansundin/vlc-protocol
             vlcUrl = `vlc://${encodeURI(mediaInfo.streamUrl)}`;
@@ -429,7 +429,7 @@
     // MPV
     async function embyMPV() {
         let mediaInfo = await getEmbyMediaInfo();
-        // 桌面端需要额外设置,参考这个项目:
+        // Desktop requires additional setup, refer to this project:
         // new: https://github.com/northsea4/mpvplay-protocol
         // old: https://github.com/akiirui/mpv-handler
         let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
@@ -493,7 +493,7 @@
 
     async function embyInfuse() {
         let mediaInfo = await getEmbyMediaInfo();
-        // sub 参数限制: 播放带有外挂字幕的单个视频文件（Infuse 7.6.2 及以上版本）
+        // sub parameter limitation: Play single video file with external subtitles (Infuse 7.6.2 and above)
         // see: https://support.firecore.com/hc/zh-cn/articles/215090997
         let infuseUrl = `infuse://x-callback-url/play?url=${encodeURIComponent(mediaInfo.streamUrl)}&sub=${encodeURIComponent(mediaInfo.subUrl)}`;
         console.log(`infuseUrl= ${infuseUrl}`);
@@ -511,7 +511,7 @@
     // MPV
     async function embyMPV() {
         let mediaInfo = await getEmbyMediaInfo();
-        //桌面端需要额外设置,使用这个项目: https://github.com/akiirui/mpv-handler
+        // Desktop requires additional setup, use this project: https://github.com/akiirui/mpv-handler
         let streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
             .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
         let MPVUrl = `mpv-handler://play/${streamUrl64}`;
@@ -530,14 +530,14 @@
 
     // see https://greasyfork.org/zh-CN/scripts/443916
     async function embyDDPlay() {
-        // 检查是否windows本地路径
+        // Check if windows local path
         const fullPathEle = document.querySelector(".mediaSources .mediaSource .sectionTitle > div:not([class]):first-child");
         let fullPath = fullPathEle ? fullPathEle.innerText : "";
         let ddplayUrl;
         if (new RegExp('^[a-zA-Z]:').test(fullPath)) {
             ddplayUrl = `ddplay:${encodeURIComponent(fullPath)}`;
         } else {
-            console.log("文件路径不是本地路径,将使用串流播放");
+            console.log("File path is not local path, will use streaming playback");
             const mediaInfo = await getEmbyMediaInfo();
             const intent = mediaInfo.intent;
             if (!fullPath) {
@@ -556,7 +556,7 @@
 
     async function embyFileball() {
         const mediaInfo = await getEmbyMediaInfo();
-        // see: app 关于, URL Schemes
+        // see: app about, URL Schemes
         const url = `filebox://play?url=${encodeURIComponent(mediaInfo.streamUrl)}`;
         console.log(`FileballUrl= ${url}`);
         window.open(url, "_self");
@@ -580,7 +580,7 @@
 
     async function embySenPlayer() {
         const mediaInfo = await getEmbyMediaInfo();
-        // see: app 关于, URL Schemes
+        // see: app about, URL Schemes
         const url = `SenPlayer://x-callback-url/play?url=${encodeURIComponent(mediaInfo.streamUrl)}`;
         console.log(`SenPlayerUrl= ${url}`);
         window.open(url, "_self");
@@ -653,24 +653,24 @@
         const streamUrl = encodeURI(mediaInfo.streamUrl);
         if (await writeClipboard(streamUrl)) {
             console.log(`copyUrl = ${streamUrl}`);
-            this.innerText = '复制成功';
+            this.innerText = 'Copy Success';
         }
     }
 
     async function writeClipboard(text) {
         let flag = false;
         if (navigator.clipboard) {
-            // 火狐上 need https
+            // Firefox needs https
             try {
                 await navigator.clipboard.writeText(text);
                 flag = true;
-                console.log("成功使用 navigator.clipboard 现代剪切板实现");
+                console.log("Successfully used navigator.clipboard modern clipboard implementation");
             } catch (error) {
-                console.error('navigator.clipboard 复制到剪贴板时发生错误:', error);
+                console.error('Error occurred when copying to clipboard using navigator.clipboard:', error);
             }
         } else {
             flag = writeClipboardLegacy(text);
-            console.log("不存在 navigator.clipboard 现代剪切板实现,使用旧版实现");
+            console.log("navigator.clipboard modern clipboard implementation not available, using legacy implementation");
         }
         return flag;
     }

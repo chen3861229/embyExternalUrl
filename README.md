@@ -1,64 +1,85 @@
-### 主要功能
-| 名称 | 功能 |
-| - | :- |
-| [emby2Alist](./emby2Alist/README.md) | emby/jellyfin 重定向到 alist 直链 |
-| [embyAddExternalUrl](./alistWebAddExternalUrl/README.md) | emby/jellyfin 全客户端(除老TV端)添加调用外部播放器按钮 |
-| [embyWebAddExternalUrl](./embyWebAddExternalUrl/README.md) | emby/jellyfin/alistWeb 调用外部播放器用户脚本,只支持网页 |
-| [plex2Alist](./plex2Alist/README.md) | plex 重定向到 alist 直链 |
 
-### 常见问题
-[FAQ](./FAQ.md)
+
+---
+
+### Main Features
+| Name | Function |
+| - | :- |
+| [emby2Alist](./emby2Alist/README.md) | Redirects Emby/Jellyfin to Alist direct links |
+| [embyAddExternalUrl](./alistWebAddExternalUrl/README.md) | Adds an external player button in all Emby/Jellyfin clients (except older TV clients) |
+| [embyWebAddExternalUrl](./embyWebAddExternalUrl/README.md) | User script for Emby/Jellyfin/AlistWeb to call external players, web-only |
+| [plex2Alist](./plex2Alist/README.md) | Redirects Plex to Alist direct links |
+
+---
+
+### FAQ
+See [FAQ](./FAQ.md)
+
+---
 
 # embyExternalUrl
 
-### emby调用外部播放器服务端脚本
+### Emby External Player Server Script
 
-通过nginx的njs模块运行js脚本,在emby视频的外部链接处添加调用外部播放器链接,所有emby官方客户端可用,
-不支持老 TV 客户端等没有外部媒体数据库链接处的情况,另外需要注意电视端内置的 web view 实现方式的兼容性
+This uses the **nginx njs module** to run a JavaScript script. It adds an external player link in the external link section of Emby videos.  
+- Works with all official Emby clients.  
+- Does **not** support older TV clients that lack an external media database link section.  
+- Be mindful of compatibility with the built-in web view implementation on TV clients.
 
-![](https://raw.githubusercontent.com/bpking1/pics/main/img/Screenshot%202023-02-06%20191721.png)
+![Screenshot](https://raw.githubusercontent.com/bpking1/pics/main/img/Screenshot%202023-02-06%20191721.png)
 
+---
 
-### 部署方式,任选一种
+### Deployment Methods (choose one)
 
-## 一.单独使用方式
+#### 1. Standalone Usage
 
-这里采用的是docker安装,也可以不使用docker,自己安装njs模块
+This example uses Docker, but you can also install the njs module manually.
 
-先下载脚本:
+Download the script:
 ```bash
-wget https://github.com/bpking1/embyExternalUrl/releases/download/v0.0.1/addExternalUrl.tar.gz && mkdir -p ~/embyExternalUrl && tar -xzvf ./addExternalUrl.tar.gz -C ~/embyExternalUrl && cd ~/embyExternalUrl
+wget https://github.com/bpking1/embyExternalUrl/releases/download/v0.0.1/addExternalUrl.tar.gz \
+  && mkdir -p ~/embyExternalUrl \
+  && tar -xzvf ./addExternalUrl.tar.gz -C ~/embyExternalUrl \
+  && cd ~/embyExternalUrl
 ```
 
-然后看情况修改externalUrl.js文件里面的serverAddr
+- Edit `externalUrl.js` to adjust `serverAddr` as needed.  
+- `tags` and `groups` are extracted from video versions as keywords for external link names. If not needed, leave them unchanged.  
+- `emby.conf` defaults to reverse proxying Emby server on port **8096** — adjust if necessary.  
+- `docker-compose.yml` maps port **8097** by default — adjust if necessary.  
 
-tags 和 groups是从视频版本中提取的关键字作为外链的名字,不需要就不用改
-
-emby.conf默认反代emby-server是本机的8096端口,按需修改
-
-docker-compose.yml默认映射8097端口,按需修改
-
-然后启动docker
-```
+Start Docker:
+```bash
 docker-compose up -d
 ```
-访问8097端口,在视频信息页面的底部就添加了外部播放器链接
 
-日志查看:
-```
+Now visit port **8097**. At the bottom of the video info page, you’ll see the external player link added.
+
+Check logs:
+```bash
 docker logs -f nginx-embyUrl 2>&1 | grep error
 ```
 
-## 二.与 emby2Alist 整合并共存
+---
 
-1. 将 externalUrl.js 放到 emby2Alist 的 conf.d 下与 emby.js 处于同一级
+#### 2. Integration with emby2Alist
 
-2. 将 emby.conf 中的 ## addExternalUrl SETTINGS ## 之间的内容复制到 emby2Alist 的 emby.conf 中 location / 块的上面
+1. Place `externalUrl.js` into the `conf.d` directory of emby2Alist, at the same level as `emby.js`.  
+2. Copy the contents between `## addExternalUrl SETTINGS ##` from `emby.conf` into the `emby2Alist` `emby.conf`, above the `location /` block.  
+3. Copy the `js_import` line from the top of `emby.conf` into the same position in `emby2Alist`’s `emby.conf`.  
+4. Restart nginx or reload the config with:  
+   ```bash
+   nginx -s reload
+   ```  
+   Then access via the nginx port configured for emby2Alist.
 
-3. 将 emby.conf 最上面的 js_import 复制到 emby2Alist 的 emby.conf 相同位置
+---
 
-4. 重启 ngixn 或者输入命令 nginx -s reload 重载配置文件,注意此时使用 emby2Alist 的 nginx 对应端口访问
+### Emby External Player User Script (Web Only)
 
-### emby调用外部播放器用户脚本,只支持网页:
+Available here: [GreasyFork Script](https://greasyfork.org/zh-CN/scripts/514529)
 
-[篡改猴地址](https://greasyfork.org/zh-CN/scripts/514529)
+---
+
+Would you like me to also **restructure this into a polished `README.md` file** (with English headings, code blocks, and deployment steps) so you can drop it directly into your GitHub repo?

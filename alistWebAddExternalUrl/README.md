@@ -1,96 +1,117 @@
 
-### alist 调用外部播放器用户脚本,支持网页和服务端:
+---
 
-greasyfork 地址: https://greasyfork.org/zh-CN/scripts/494829
+## 🎯 Purpose
+This user script enables AList users to launch external video players directly from the web interface. It supports both standalone browser use and server-side integration.
 
-按需更改的地方:
+📜 **Script URL**: [GreasyFork – alistWebLaunchExternalPlayer](https://greasyfork.org/zh-CN/scripts/494829)
 
-1.代码内部变量
+---
+
+## ⚙️ Configurable Variables
 
 ```js
-// 是否替换原始外部播放器
-const replaceOriginLinks = true;
-// 是否使用内置的 Base64 图标
-const useInnerIcons = true;
-// 移除最后几个冗余的自定义开关
-const removeCustomBtns = false;
+const replaceOriginLinks = true;     // Replace original external player links
+const useInnerIcons = true;          // Use built-in Base64 icons
+const removeCustomBtns = false;      // Remove redundant custom toggles
 ```
 
-效果:
+---
 
-AList V3
-![](https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/preview/preview01.png)
+## 🖼️ Visual Preview
 
-AList V2
-![](https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/preview/preview02.png)
+- **AList V3**  
+  ![Preview V3](https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/preview/preview01.png)
 
-一. 浏览器单独使用方法
+- **AList V2**  
+  ![Preview V2](https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/preview/preview02.png)
 
-1. 安装 [Tampermonkey](https://www.tampermonkey.net) 拓展插件,
-2. 进入脚本详情页点击安装
-3. 打开已安装的脚本列表,点击启用按钮,再点击最后边的编辑按钮,选择设置选项卡,
-编辑 包括/排除,去掉 原始匹配 勾选的泛化全域名,在 用户匹配 中添加响应的 alist 域名,不能包含端口号,会被忽略
+---
 
-二. 添加到服务端 alist 网站上
+## 🧩 Deployment Methods
 
-1. 登录 alist 管理后台 -> 设置 -> 全局 -> 自定义头部,填入脚本地址即可
+### 1. Browser-Only (Tampermonkey)
 
-```js
-<!-- 这是 alist 原本自带的 -->
+1. Install [Tampermonkey](https://www.tampermonkey.net)
+2. Visit the [script page](https://greasyfork.org/zh-CN/scripts/494829) and click **Install**
+3. Open Tampermonkey dashboard → Enable the script → Click **Edit** → Go to **Settings** tab
+4. Under **Include/Exclude**, remove the generic domain match and add your AList domain manually (without port number)
+
+---
+
+### 2. Server-Side Integration (AList Admin Panel)
+
+1. Log in to AList admin → Settings → Global → Custom Header
+2. Add the script reference:
+
+```html
+<!-- AList default polyfill -->
 <script src="https://polyfill.io/v3/polyfill.min.js?features=String.prototype.replaceAll"></script>
-<!-- 自己下载到服务器本地开放此文件出来 -->
-<!-- <script src="https://xxx:85/alistWebLaunchExternalPlayer.js"></script> -->
-<!-- 或下面的 CDN 仓库二选一 -->
-<!-- <script src="https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/alistWebLaunchExternalPlayer.js"></script> -->
-<!-- <script src="https://fastly.jsdelivr.net/gh/bpking1/embyExternalUrl@main/embyWebAddExternalUrl/alistWebLaunchExternalPlayer.js"></script> -->
+
+<!-- Choose one of the following script sources -->
+<!-- Self-hosted -->
+<script src="https://yourdomain.com/alistWebLaunchExternalPlayer.js"></script>
+
+<!-- CDN options -->
+<script src="https://emby-external-url.7o7o.cc/alistWebAddExternalUrl/alistWebLaunchExternalPlayer.js"></script>
+<script src="https://fastly.jsdelivr.net/gh/bpking1/embyExternalUrl@main/embyWebAddExternalUrl/alistWebLaunchExternalPlayer.js"></script>
 ```
 
-#### 其余注意事项请参照
-greasyfork 地址: https://greasyfork.org/en/scripts/459297-embylaunchpotplayer
+---
 
-### CHANGELOG
+## 📌 Additional Notes
 
-#### 1.1.4
-1. fix(alistWebLaunchExternalPlayer): 兼容新的 vlc-protocol,mpvplay-protocol 播放链接
+- Refer to [embyLaunchPotplayer](https://greasyfork.org/en/scripts/459297-embylaunchpotplayer) for related functionality and compatibility tips.
 
-#### 1.1.3
-1. fix(alistWebLaunchExternalPlayer): 提供内部变量移除最后几个冗余的自定义开关
+---
 
-#### 1.1.2
-1. feat(alistWebLaunchExternalPlayer): 隐藏其他平台播放器开关数据隔离,添加多开Potplayer开关
+## 📝 CHANGELOG
 
-#### 1.1.1
-1. 添加几个播放器支持
-2. 默认开启隐藏其他平台播放器图标
+### 1.1.4
+- Fixed compatibility with `vlc-protocol` and `mpvplay-protocol`
 
-#### 1.1.0
-1. 修复剪切板 API 兼容性
+### 1.1.3
+- Added internal toggle to remove redundant custom switches
 
-#### 1.0.9
-1. 修复 Google Chrome Version >= 130 导致的 PotPlayer 拉起播放错误,但注意不要禁用剪切板权限
-2. 意外修复了 PotPlayer 串流的中文标题支持问题
+### 1.1.2
+- Added toggle to hide other platform players
+- Added multi-instance PotPlayer support
 
-#### 1.0.8
-1. 修复 mpv-handler 编码错误
-2. 更换 @match 为严格匹配以兼容暴力猴
+### 1.1.1
+- Added support for additional players
+- Default: hide other platform icons
 
-#### 1.0.7
-1. 再次修复 URL 编码错误
+### 1.1.0
+- Fixed clipboard API compatibility
 
-#### 1.0.6
-1. 优先使用本地 base64 图标提升加载速度
+### 1.0.9
+- Fixed PotPlayer launch issue on Chrome ≥130
+- Improved Chinese title support in PotPlayer
 
-#### 1.0.5
-1. 修复 MX 错误的注释内容
+### 1.0.8
+- Fixed `mpv-handler` encoding bug
+- Updated `@match` for Violentmonkey compatibility
 
-#### 1.0.4
-1. 延迟加载点以适配服务端自定义头部
+### 1.0.7
+- Fixed URL encoding bug again
 
-#### 1.0.3
-1. 兼容 AList V2
+### 1.0.6
+- Prioritized local Base64 icons for faster loading
 
-#### 1.0.2
-1. 降低 token 依赖适配第三方网站
+### 1.0.5
+- Fixed incorrect MXPlayer comments
 
-#### 1.0.1
-1. 修复错误的 URL 双重编码
+### 1.0.4
+- Delayed script loading to match server-side custom headers
+
+### 1.0.3
+- Added compatibility for AList V2
+
+### 1.0.2
+- Reduced token dependency for third-party site compatibility
+
+### 1.0.1
+- Fixed double URL encoding issue
+
+---
+
