@@ -231,14 +231,14 @@ const getMPVUrl = (mediaInfo) => {
     // 桌面端需要额外设置,使用这个项目: https://github.com/akiirui/mpv-handler
     const streamUrl64 = btoa(String.fromCharCode.apply(null, new Uint8Array(new TextEncoder().encode(mediaInfo.streamUrl))))
         .replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-    let MPVUrl = `mpv://play/${streamUrl64}`;
+    let MPVUrl = `mpv-handler://play/${streamUrl64}`;
     if (mediaInfo.subUrl.length > 0) {
         let subUrl64 = btoa(mediaInfo.subUrl).replace(/\//g, "_").replace(/\+/g, "-").replace(/\=/g, "");
-        MPVUrl = `mpv://play/${streamUrl64}/?subfile=${subUrl64}`;
+        MPVUrl = `mpv-handler://play/${streamUrl64}/?subfile=${subUrl64}`;
     }
 
     if (osType == "ios" || osType == "android") {
-        MPVUrl = `mpv://${encodeURI(mediaInfo.streamUrl)}`;
+        MPVUrl = `mpv-handler://${encodeURI(mediaInfo.streamUrl)}`;
     }
 
     const url64 = Buffer.from(MPVUrl, 'utf8').toString('base64');
